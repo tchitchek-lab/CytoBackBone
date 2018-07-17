@@ -1,0 +1,22 @@
+Package: CytoBackBone
+Type: Package
+Title: Merging of phenotype information from different cytometric profiles
+Date: 2018-07-17
+Version: 1.0.0
+Author: Nicolas TCHITCHEK
+Maintainer: Nicolas TCHITCHEK <nicolas.tchitchek@gmail.com>
+Description: Single-cell technologies are the most suitable techniques for the characterization of cells by the differential expression of the molecules that define their roles and functions in tissues. Among these techniques, mass cytometry represents a leap forward by increasing the number of available measurements to approximately 40 cell markers. Thanks to this technology, detailed immune responses were described in several diseases. However, the study of immune responses, such as that due to viral infections or auto-immune diseases, could be further improved by increasing the number of simultaneously measurable markers. To increase this number, we designed an algorithm, named CytoBackBone, which combines phenotypic information of different cytometric profiles obtained from different cytometry panels.
+License: GPL-3 | file LICENSE
+Depends:
+    R (>= 3.1),
+Imports:
+    flowCore,
+    flowUtils,
+    ggplot2,
+    FNN,
+	methods,
+	preprocessCore
+biocViews: FlowCytometry, Clustering, Visualization, SingleCell
+VignetteBuilder: knitr
+Suggests: knitr,rmarkdown
+RoxygenNote: 6.0.1
