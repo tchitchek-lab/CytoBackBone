@@ -3,10 +3,10 @@
 \docType{methods}
 \name{extract}
 \alias{extract}
-\alias{[,FCS,ANY,ANY,ANY-method}
+\alias{[,FCS,ANY-method}
 \title{Extraction of subsets of data from FCS objects}
 \usage{
-\S4method{[}{FCS,ANY,ANY,ANY}(x, i, j)
+\S4method{[}{FCS,ANY}(x, i, j)
 }
 \arguments{
 \item{x}{a FCS object}

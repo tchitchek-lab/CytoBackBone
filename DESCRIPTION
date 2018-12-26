@@ -19,4 +19,4 @@ Imports:
 biocViews: FlowCytometry, Clustering, Visualization, SingleCell
 VignetteBuilder: knitr
 Suggests: knitr,rmarkdown
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0

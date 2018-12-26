@@ -45,7 +45,7 @@ merge <- function(FCS1, FCS2, BBmarkers=NULL, th = length(BBmarkers)*0.20, norma
 		print(FCS1markersnotbb)
 		print(FCS2markersnotbb)
 		print(intersect(FCS1markersnotbb,FCS2markersnotbb))
-		stop("BackBone markers are not consistent between the two cytometric profiles")
+		stop("error: BackBone markers are not consistent between the two cytometric profiles")
 	}
 		
 	FCS1markersnotbb                                 <- FCS1markersnotbb[FCS1markersnotbb %in% FCS2markersnotbb]

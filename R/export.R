@@ -18,11 +18,7 @@ setGeneric("export",function(object,filename) { standardGeneric("export") })
 #' @export
 setMethod("export",c("FCS"),
     function(object,filename="FCS.fcs"){
-		#if(transform==TRUE){
-			data                  <- sinh_coeff(object@intensities)
-		#}else{
-		#	data                  <- object@intensities
-		#}
+		data                      <- sinh_coeff(object@intensities)
 		flowFrame                 <- createFlowFrame(data,object@markers)
         suppressWarnings(filename <- flowCore::write.FCS(flowFrame,filename))
     }
