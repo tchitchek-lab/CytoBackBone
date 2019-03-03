@@ -1,11 +1,3 @@
----  
-title: 'CytoBackBone: an R package for merging of phenotype information from different cytometric profiles'
-output:
-  html_document:
-    cache: no
-    keep_md: yes
----
-
 # CytoBackBone: an R package for merging of phenotype information from different cytometric profiles
 
 
