@@ -5,7 +5,7 @@
 \title{Merging two FCS objects}
 \usage{
 merge(FCS1, FCS2, BBmarkers = NULL, th = length(BBmarkers) * 0.2,
-  normalize = TRUE, output = "merged")
+  normalize = TRUE, leftout = FALSE)
 }
 \arguments{
 \item{FCS1}{a first FCS object to merge}
@@ -18,7 +18,7 @@ merge(FCS1, FCS2, BBmarkers = NULL, th = length(BBmarkers) * 0.2,
 
 \item{normalize}{a logical indicating if the expressions of backbone markers must be quantile-normalized}
 
-\item{output}{a character indicating the output of the merging. Possible values are: "merged" to obtain the merged cytometric profile (default), "profile1_spe" to obtain the cells specific to the profile 1, and "profile2_spe" to obtain the cells specific to the profile 2}
+\item{leftout}{a logical indicating if left-out cells (cells not merged during the merging procedure) must also be extracted in the output results. If set to TRUE then the output will be a named list containing the merged cytometric profile (named "merged"), the cells specific to the first profile (named "specific.FCS1"), the cells specific to the second profile (named "specific.FCS2"), and the cells specific to both profiles (named "specific").}
 }
 \value{
 a S4 object of class FCS
@@ -35,4 +35,6 @@ To be defined as non-ambiguous nearest neighbors, two cells from two different p
 More precisely, the algorithm works as follows: (i) cells of each cytometric profile with no acceptable neighbors are first excluded from the two input profiles; (ii) all acceptable and non-ambiguous nearest neighbor cells remaining in the two profiles are merged into a new profile and are discarded from the two input profiles; (iii) the previous step of this procedure is repeated until no more acceptable and non-ambiguous neighbor cells can be found; and (iv) finally, all excluded and remaining cells are stored in supplementary cytometric profiles for information purposes. These successive iterations ensure that the algorithm finds a new set of acceptable and non-ambiguous neighbor cells at each step. The number of iteration performed by the algorithm varies depending on the dataset used, but usually ranges from 2 to 30 interactions.
 
 A distance threshold defining acceptable nearest neighbors needs to be specified to avoid merging data between two cells that have very different levels for the backbone markers: the lower the threshold, the more accurate the merging. However, the threshold must not be too stringent as, by definition, cells cannot have exactly the same phenotype. On the contrary, merging can result in a significant loss of cells. Thus, the threshold must be carefully set to allow CytoBackBone to merge data from cells with similar levels of the backbone markers within a reasonable error range. The Euclidean distance between cells increases with the number of backbone markers. Therefore, the threshold value must be adjusted according to the length of this backbone.
+
+Cells discarded (having no acceptable and not-ambiguous neighbours) during the merging procedure (i.e., cells specific to the two cytometric profiles to merge) can be extracted using the `leftout` argument.
 }

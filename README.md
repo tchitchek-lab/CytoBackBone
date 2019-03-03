@@ -1,10 +1,21 @@
+---  
+title: 'CytoBackBone: an R package for merging of phenotype information from different cytometric profiles'
+output:
+  html_document:
+    cache: no
+    keep_md: yes
+---
+
 # CytoBackBone: an R package for merging of phenotype information from different cytometric profiles
+
+
 
 # Table of Contents
 1. [Package overview](#package_overview)
 2. [Package installation](#package_installation)
 3. [Import of cytometry profiles](#import)
 4. [Merging of cytometry profiles](#merging)
+5. [Extraction of left-out cells](#specific)
 
 # <a name="package_overview"></a> 1. Package overview
 Single-cell technologies are the most suitable techniques for the characterization of cells by the differential expression of the molecules that define their roles and functions in tissues. Among these techniques, mass cytometry represents a leap forward by increasing the number of available measurements to approximately 40 cell markers. Thanks to this technology, detailed immune responses were described in several diseases.However, the study of immune responses, such as that due to viral infections or auto-immune diseases, could be further improved by increasing the number of simultaneously measurable markers. To increase this number, we designed an algorithm, named CytoBackBone, which combines phenotypic information of different cytometric profiles obtained from different cytometry panels.
@@ -75,7 +86,7 @@ print(FCS1)
 
 ```
 ## Object class: FCS
-## Object name: sample1-panelA.fcs
+## Object name: sample1-panelA
 ## Number of cells: 396,240
 ## Number of markers: 11
 ## Markers: CD11c; CD123; CD14; CD141; CD16; CCR5; CD11a; CD23; CD83; IL6; MCP-1
@@ -87,7 +98,7 @@ print(FCS2)
 
 ```
 ## Object class: FCS
-## Object name: sample1-panelB.fcs
+## Object name: sample1-panelB
 ## Number of cells: 381,679
 ## Number of markers: 9
 ## Markers: CD11c; CD123; CD14; CD141; CD16; CD11b; CD28; CXCR4; TLR2
@@ -155,7 +166,7 @@ print(FCS_merged)
 
 ```
 ## Object class: FCS
-## Object name: FCS+FCS
+## Object name: sample1-panelA + sample1-panelB
 ## Number of cells: 115,788
 ## Number of markers: 15
 ## Markers: CD11c; CD123; CD14; CD141; CD16; CCR5; CD11a; CD11b; CD23; CD28; CD83; CXCR4; IL6; MCP-1; TLR2
@@ -171,5 +182,97 @@ plot(FCS_merged)
 
 ```r
 export(FCS_merged,filename = "merged.fcs")
+```
+
+# <a name="specific"></a> 5. Extraction of left-out cells
+Cells discarded (having no acceptable and not-ambiguous neighbours) during the merging procedure (i.e., cells specific to the two cytometric profiles to merge) can be extracted using the `leftout` argument of the `merge` function. 
+If the `leftout` parameter is set to `TRUE` then the result of the `merge` function will be a list containing the merged profile and the left-out cells.
+
+
+```r
+FCS_profiles   <- merge(FCS1,FCS2,BBmarkers=c("CD11c","CD123","CD14","CD141","CD16"),th=0.01*5,leftout=TRUE)
+```
+
+```
+## === CytoBackBone ===
+## Normalizing profiles
+## processing marker: CD11c
+## processing marker: CD123
+## processing marker: CD14
+## processing marker: CD141
+## processing marker: CD16
+## profile 1 contains 396,240 cells
+## profile 2 contains 381,679 cells
+## ===
+## profile 1 has 136,908 cells can be potentialy matched
+## profile 2 has 131,841 cells can be potentialy matched
+## ===
+## maximum of number of cells that can be matched by CytoBackBone = 131,841 
+## ===
+## step #1: 77,371 cells matched (54,470 cells remaining)
+## step #2: 99,051 cells matched (32,790 cells remaining)
+## step #3: 108,064 cells matched (23,777 cells remaining)
+## step #4: 112,149 cells matched (19,692 cells remaining)
+## step #5: 114,082 cells matched (17,759 cells remaining)
+## step #6: 115,018 cells matched (16,823 cells remaining)
+## step #7: 115,494 cells matched (16,347 cells remaining)
+## step #8: 115,707 cells matched (16,134 cells remaining)
+## step #9: 115,772 cells matched (16,069 cells remaining)
+## step #10: 115,786 cells matched (16,055 cells remaining)
+## step #11: 115,788 cells matched (16,053 cells remaining)
+## ====================
+```
+
+
+```r
+# display the merged profile
+print(FCS_profiles[["merged"]])
+```
+
+```
+## Object class: FCS
+## Object name: sample1-panelA + sample1-panelB
+## Number of cells: 115,788
+## Number of markers: 15
+## Markers: CD11c; CD123; CD14; CD141; CD16; CCR5; CD11a; CD11b; CD23; CD28; CD83; CXCR4; IL6; MCP-1; TLR2
+```
+
+```r
+# display a profile corresponding to cells specific to the first profile
+print(FCS_profiles[["specific.FCS1"]])
+```
+
+```
+## Object class: FCS
+## Object name: cells specific to sample1-panelA
+## Number of cells: 280,452
+## Number of markers: 11
+## Markers: CCR5; CD11a; CD11c; CD123; CD14; CD141; CD16; CD23; CD83; IL6; MCP-1
+```
+
+```r
+# display a profile corresponding to cells specific to the second profile
+print(FCS_profiles[["specific.FCS2"]])
+```
+
+```
+## Object class: FCS
+## Object name: cells specific to sample1-panelB
+## Number of cells: 265,891
+## Number of markers: 9
+## Markers: CD11b; CD11c; CD123; CD14; CD141; CD16; CD28; CXCR4; TLR2
+```
+
+```r
+# display a profile corresponding to cells specific to boths profiles (all left-out cells)
+print(FCS_profiles[["specific"]])
+```
+
+```
+## Object class: FCS
+## Object name: cells specific to sample1-panelA or sample1-panelB
+## Number of cells: 546,343
+## Number of markers: 15
+## Markers: CCR5; CD11a; CD11c; CD123; CD14; CD141; CD16; CD23; CD83; IL6; MCP-1; CD11b; CD28; CXCR4; TLR2
 ```
 

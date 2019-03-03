@@ -48,7 +48,8 @@ normalizeQuantile <- function(list,BBmarkers){
 		res <- preprocessCore::normalize.quantiles(as.matrix(input))
 		i <- 1
 		for(cell in list){
-			list[[i]]@intensities[,list[[i]]@markers==markers] <- res[,i] ###...??
+			idx = list[[i]]@markers==markers
+			list[[i]]@intensities[,idx] <- res[,i]
 			i <- i+1
 		}
 	}

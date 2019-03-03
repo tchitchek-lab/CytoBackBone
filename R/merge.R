@@ -11,18 +11,23 @@
 #'
 #' A distance threshold defining acceptable nearest neighbors needs to be specified to avoid merging data between two cells that have very different levels for the backbone markers: the lower the threshold, the more accurate the merging. However, the threshold must not be too stringent as, by definition, cells cannot have exactly the same phenotype. On the contrary, merging can result in a significant loss of cells. Thus, the threshold must be carefully set to allow CytoBackBone to merge data from cells with similar levels of the backbone markers within a reasonable error range. The Euclidean distance between cells increases with the number of backbone markers. Therefore, the threshold value must be adjusted according to the length of this backbone.
 #'
+#' Cells discarded (having no acceptable and not-ambiguous neighbours) during the merging procedure (i.e., cells specific to the two cytometric profiles to merge) can be extracted using the `leftout` argument. 
+#'
 #' @param FCS1 a first FCS object to merge
 #' @param FCS2 a second FCS object to merge
 #' @param BBmarkers a character indicating the markers to use as backbone markers
 #' @param th a numerical value indicating the threshold distance to use to consider two cells as acceptable neighbors
 #' @param normalize a logical indicating if the expressions of backbone markers must be quantile-normalized
-#' @param output a character indicating the output of the merging. Possible values are: "merged" to obtain the merged cytometric profile (default), "profile1_spe" to obtain the cells specific to the profile 1, and "profile2_spe" to obtain the cells specific to the profile 2
+#' @param leftout a logical indicating if left-out cells (cells not merged during the merging procedure) must also be extracted in the output results. If set to TRUE then the output will be a named list containing the merged cytometric profile (named "merged"), the cells specific to the first profile (named "specific.FCS1"), the cells specific to the second profile (named "specific.FCS2"), and the cells specific to both profiles (named "specific").
 #'
 #' @return a S4 object of class FCS
 #'
 #' @export
-merge <- function(FCS1, FCS2, BBmarkers=NULL, th = length(BBmarkers)*0.20, normalize=TRUE, output="merged") {
+merge <- function(FCS1, FCS2, BBmarkers=NULL, th = length(BBmarkers)*0.20, normalize=TRUE, leftout=FALSE) {
 
+	name1 = FCS1@name
+	name2 = FCS2@name
+	
 	FCS1 <- FCS1[,sort(FCS1@markers)]
 	FCS2 <- FCS2[,sort(FCS2@markers)]
 	
@@ -41,11 +46,19 @@ merge <- function(FCS1, FCS2, BBmarkers=NULL, th = length(BBmarkers)*0.20, norma
 	FCS2markersnotbb                                 <- FCS2@markers[!(FCS2@markers %in% paste0("BB_",BBmarkers))]
 	
 	if(length(intersect(FCS1markersnotbb,FCS2markersnotbb))>0){
-		print(BBmarkers)
-		print(FCS1markersnotbb)
-		print(FCS2markersnotbb)
-		print(intersect(FCS1markersnotbb,FCS2markersnotbb))
-		stop("error: BackBone markers are not consistent between the two cytometric profiles")
+		message("----------ERROR----------")
+		message("backbone markers are not consistent between the two cytometric profiles")
+		message("backbone markers: ",appendLF=FALSE)
+		message(paste0(BBmarkers,collapse=","))
+		message("specific markers for FCS1: ",appendLF=FALSE)
+		message(paste0(FCS1markersnotbb,collapse=","))
+		message("specific markers for FCS2: ",appendLF=FALSE)
+		message(paste0(FCS2markersnotbb,collapse=","))
+		message("intersection: ",appendLF=FALSE)
+		intersect = intersect(FCS1markersnotbb,FCS2markersnotbb)
+		message(paste0(intersect,collapse=","))
+		message("----------ERROR----------")
+		stop()
 	}
 		
 	FCS1markersnotbb                                 <- FCS1markersnotbb[FCS1markersnotbb %in% FCS2markersnotbb]
@@ -63,12 +76,16 @@ merge <- function(FCS1, FCS2, BBmarkers=NULL, th = length(BBmarkers)*0.20, norma
 	FCS2_BB                     <- FCS2[,FCS2@markers[grep("BB_",FCS2@markers)]]@intensities
 	colnames(FCS2_BB)           <- FCS2@markers[grep("BB_",FCS2@markers)]
 	dist                        <- FNN::knnx.dist(FCS2_BB,FCS1_BB,k=1,algorithm="kd_tree")
-	FCS1_excluded               <- FCS1
-	FCS1_excluded               <- FCS1_excluded[dist>th]
+	FCS1_excluded               <- NULL
+	if(sum(dist>th)!=0){
+		FCS1_excluded           <- FCS1[dist>th]
+	}
 	FCS1                        <- FCS1[dist<th]
 	dist                        <- FNN::knnx.dist(FCS1_BB,FCS2_BB,k=1,algorithm="kd_tree")
-	FCS2_excluded               <- FCS2
-	FCS2_excluded               <- FCS2_excluded[dist>th]
+	FCS2_excluded               <- NULL
+	if(sum(dist>th)!=0){
+		FCS2_excluded           <- FCS2[dist>th]
+	}
 	FCS2                        <- FCS2[dist<th]
 	cat(paste0("profile 1 has ",format(FCS1@cell.nb,big.mark=",")," cells can be potentialy matched\n"))
 	cat(paste0("profile 2 has ",format(FCS2@cell.nb,big.mark=",")," cells can be potentialy matched\n"))
@@ -77,7 +94,6 @@ merge <- function(FCS1, FCS2, BBmarkers=NULL, th = length(BBmarkers)*0.20, norma
 	max <- min(FCS1@cell.nb,FCS2@cell.nb)
 	cat(paste0("maximum of number of cells that can be matched by CytoBackBone = ",format(max,big.mark=",")),"\n")
 	cat("===\n")
-	
 		
 	FCS1_BB                       <- FCS1[,FCS1@markers[grep("BB_",FCS1@markers)]]@intensities
 	colnames(FCS1_BB)             <- FCS1@markers[grep("BB_",FCS1@markers)]
@@ -145,26 +161,37 @@ merge <- function(FCS1, FCS2, BBmarkers=NULL, th = length(BBmarkers)*0.20, norma
 		}
 	}
 	
-	FCS1_excluded <- c(FCS1_excluded,FCS1)
-	FCS2_excluded <- c(FCS2_excluded,FCS2)
+	if(!is.null(FCS1_excluded)){
+		FCS1_excluded          <- c(FCS1_excluded,FCS1)
+		FCS1_excluded@markers  <- gsub("BB_","",FCS1_excluded@markers)
+		FCS1_excluded@name     <- paste0("cells specific to ",name1)
+	}
 	
-	FCS           <- as.FCS(data)
-	FCS           <- FCS[,sort(FCS@markers)]
-	FCS           <- merge_header(FCS)
-	FCS@markers   <- gsub("BB_","",FCS@markers)
-	FCS@name      <- paste0(FCS1@name,"+",FCS2@name)
+	if(!is.null(FCS2_excluded)){
+		FCS2_excluded          <- c(FCS2_excluded,FCS2)
+		FCS2_excluded@markers  <- gsub("BB_","",FCS2_excluded@markers)
+		FCS2_excluded@name     <- paste0("cells specific to ",name2)
+	}
+	
+	excluded = NULL
+	if(!is.null(FCS1_excluded) && !is.null(FCS2_excluded)){
+		excluded               <- c(FCS1_excluded,FCS2_excluded)
+		excluded@markers       <- gsub("BB_","",excluded@markers)
+		excluded@name          <- paste0("cells specific to ",name1," or ",name2)
+	}
+	
+	FCS                    <- as.FCS(data)
+	FCS                    <- FCS[,sort(FCS@markers)]
+	FCS                    <- merge_header(FCS)
+	FCS@markers            <- gsub("BB_","",FCS@markers)
+	FCS@name               <- paste0(name1," + ",name2)
 	
 	cat("====================\n")
 	
-	if(output=="merged"){
+	if(leftout==FALSE){
 		return(FCS)
-	}else if (output=="profile1_spe"){
-		return(FCS1_excluded)
-	}else if (output=="profile2_spe"){
-		return(FCS2_excluded)
 	}else{
-		stop("BackBone markers are not consistent between the two cytometric profiles")
+		return(list(merged=FCS,specific.FCS1=FCS1_excluded,specific.FCS2=FCS2_excluded,specific=excluded))
 	}
-	
 	
 }

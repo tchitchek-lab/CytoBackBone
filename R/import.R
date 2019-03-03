@@ -85,7 +85,7 @@ import.FCS <- function(path,
         FCS@intensities[,to.transform] <- log(FCS@intensities[,to.transform] + trans.para$log.shift,trans.para$log.base)
     }
 	
-	FCS@name          <- paste(basename(path),sep="",collapse=";")
+	FCS@name          <- paste(gsub(".fcs","",basename(path)),sep="",collapse=";")
     FCS@trans         <- trans
     FCS@trans.para    <- trans.para
     FCS@trans.exclude <- trans.exclude

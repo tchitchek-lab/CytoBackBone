@@ -63,12 +63,12 @@ setMethod("plot",c("FCS","FCS"),
 		
 		frame.profile1 <- data.frame(profiles    = 1,
 								 	 markers     = markers,
-									 intensities = apply(object1@intensities[,object1@markers %in% markers],2,mean),
+									 intensities = apply(object1@intensities[,object1@markers %in% markers,drop=FALSE],2,mean),
 									 stringsAsFactors = FALSE)
 									 
 		frame.profile2 <- data.frame(profiles    = 2,
 									 markers     = markers,
-									 intensities = apply(object2@intensities[,object2@markers %in% markers],2,mean),
+									 intensities = apply(object2@intensities[,object2@markers %in% markers,drop=FALSE],2,mean),
 									 stringsAsFactors = FALSE)
 									 
 		plots <- ggplot2::ggplot() +
