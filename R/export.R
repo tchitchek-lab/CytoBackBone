@@ -27,4 +27,3 @@ setMethod("export",c("FCS"),
         suppressWarnings(filename <- flowCore::write.FCS(flowFrame,filename))
     }
 )
- 
