@@ -6,14 +6,18 @@
 \alias{export,FCS-method}
 \title{Exportation of FCS objects}
 \usage{
-export(object, filename)
+export(object, filename, ...)
 
-\S4method{export}{FCS}(object, filename = "FCS.fcs")
+\S4method{export}{FCS}(object, filename = "FCS.fcs", transform = TRUE)
 }
 \arguments{
 \item{object}{a FCS object}
 
 \item{filename}{a character indicating the location of the FCS file to save}
+
+\item{...}{aadditional parameters}
+
+\item{transform}{a logical indicating if a sinh transformation must be performed when exporting the FCS}
 }
 \value{
 None
