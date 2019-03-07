@@ -22,6 +22,8 @@ setMethod("export",c("FCS"),
     function(object,filename="FCS.fcs",transform=TRUE){
 		if(transform==TRUE){
 			data                  <- sinh_coeff(object@intensities)
+		}else{
+			data                  <- object@intensities
 		}
 		flowFrame                 <- createFlowFrame(data,object@markers)
         suppressWarnings(filename <- flowCore::write.FCS(flowFrame,filename))
